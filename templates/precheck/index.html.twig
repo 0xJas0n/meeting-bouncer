@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% import '_ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.precheck'|trans }} · Meeting Bouncer{% endblock %}
+
+{% block body %}
+{# Plain POST on purpose: Turbo rejects a 200 form response, and this page renders the result in place. #}
+<form method="post" action="{{ path('precheck') }}#result" data-turbo="false" class="sheet form stack">
+    <header class="form-head">
+        <small>{{ 'pre.kicker'|trans }}</small>
+        <h2>{{ 'pre.title'|trans }}</h2>
+        <p class="hint">{{ 'pre.hint'|trans }}</p>
+    </header>
+    <input type="hidden" name="_token" value="{{ csrf_token('precheck') }}">
+    <label class="field"><span>{{ 'pre.field.title'|trans }}</span><input name="title" value="{{ draft.title }}" required maxlength="200" placeholder="{{ 'pre.field.title.ph'|trans }}"></label>
+    <label class="field"><span>{{ 'pre.field.desc'|trans }}</span><textarea name="description" rows="4" placeholder="{{ 'pre.field.desc.ph'|trans }}">{{ draft.description }}</textarea></label>
+    <label class="field"><span>{{ 'pre.field.names'|trans }}</span><textarea name="names" rows="2" placeholder="{{ 'pre.field.names.ph'|trans }}">{{ draft.names }}</textarea></label>
+    <div class="two">
+        <label class="field"><span>{{ 'pre.field.guests'|trans }}</span><input type="number" name="attendeeCount" required min="1" max="500" value="{{ draft.attendeeCount }}"></label>
+        <label class="field"><span>{{ 'pre.field.duration'|trans }}</span><input type="number" name="durationMin" required min="5" max="480" step="5" value="{{ draft.durationMin }}"></label>
+    </div>
+    <button><span>{{ 'pre.check'|trans }}</span></button>
+</form>
+
+{% if result %}
+<article id="result" class="sheet form result" aria-live="polite">
+    <div class="result-head">
+        <div>
+            <small>{{ 'pre.returned'|trans }}</small>
+            <h2>{{ (result.ready ? 'pre.ready' : 'pre.needs_work')|trans }}</h2>
+            <p class="facts"><span><i aria-hidden="true">euro</i>{{ 'pre.cost'|trans({cost: result.costCents|eur, rate: rate}) }}</span></p>
+        </div>
+        {{ ui.ink(result.ready ? 'confirmed' : 'overridden', 'lg', (result.ready ? 'pre.ink.ready' : 'pre.ink.fix')|trans) }}
+    </div>
+    {% if result.aiReason %}
+        <section class="form-part">
+            <h3>{{ 'pre.ai'|trans }}</h3>
+            <p>{{ result.aiReason }}</p>
+        </section>
+    {% endif %}
+    {% if result.flags %}
+        <section class="form-part">
+            <h3>{{ 'ui.doorcheck'|trans }}</h3>
+            <ul class="checklist">{% for f in result.flags %}<li><span class="box" aria-hidden="true"><i>close</i></span>{{ f }}</li>{% endfor %}</ul>
+        </section>
+    {% endif %}
+    {% if not result.ready and not result.flags and not result.suggestions %}
+        <section class="form-part note fixes"><p>{{ 'pre.ai_only'|trans }}</p></section>
+    {% endif %}
+    {% if result.suggestions %}
+        <section class="form-part note fixes">
+            <h3>{{ 'pre.fixes'|trans }}</h3>
+            <ul>{% for s in result.suggestions %}<li>{{ s }}</li>{% endfor %}</ul>
+        </section>
+    {% endif %}
+</article>
+{% endif %}
+{% endblock %}
+
+{% block aside %}
+<div class="note">
+    <h2>{{ 'pre.why.title'|trans }}</h2>
+    <p>{{ 'pre.why.text'|trans|raw }}</p>
+    <p><small><i aria-hidden="true">lock</i> {{ 'pre.why.privacy'|trans }}</small></p>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'err.404.title'|trans }} · Meeting Bouncer{% endblock %}
+
+{% block body %}
+<div class="tray-empty">
+    <i aria-hidden="true">search_off</i>
+    <p><strong>{{ 'err.404.title'|trans }}</strong> {{ 'err.404.text'|trans }}</p>
+    <a href="{{ path('dashboard') }}" class="button border"><i aria-hidden="true">arrow_back</i> <span>{{ 'verdict.back'|trans }}</span></a>
+</div>
+{% endblock %}

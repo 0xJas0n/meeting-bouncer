@@ -1,0 +1,24 @@
+deptrac:
+  paths:
+    - src
+  layers:
+    - name: Domain
+      collectors:
+        - { type: directory, value: 'src/.*/Domain/.*' }
+    - name: Application
+      collectors:
+        - { type: directory, value: 'src/.*/Application/.*' }
+    - name: Infrastructure
+      collectors:
+        - { type: directory, value: 'src/.*/Infrastructure/.*' }
+    - name: UI
+      collectors:
+        - { type: directory, value: 'src/.*/UI/.*' }
+    - name: Framework
+      collectors:
+        - { type: classLike, value: '^(Symfony|Doctrine|Mcp|Psr)\\.*' }
+  ruleset:
+    Domain: ~                                   # pure PHP: depends on nothing
+    Application: [Domain, Framework]            # Messenger attributes only
+    Infrastructure: [Domain, Application, Framework]
+    UI: [Domain, Application, Framework]

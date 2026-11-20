@@ -1,0 +1,14 @@
+ai:
+    # see https://symfony.com/doc/current/ai/components/platform.html
+    platform:
+        mistral:
+            api_key: '%env(MISTRAL_API_KEY)%'
+        anthropic:
+            api_key: '%env(ANTHROPIC_API_KEY)%'
+
+    # One agent per use case. To switch provider change `platform` and `model` here
+    # (e.g. 'ai.platform.anthropic' + 'claude-sonnet-5-5'); no PHP changes needed.
+    agent:
+        bouncer:
+            platform: 'ai.platform.mistral'
+            model: 'mistral-medium-latest'

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "meeting-bouncer": {
+      "command": "php",
+      "args": ["bin/console", "mcp:server"]
+    }
+  }
+}

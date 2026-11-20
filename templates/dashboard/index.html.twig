@@ -1,0 +1,184 @@
+{% extends 'base.html.twig' %}
+
+{% import '_ui.html.twig' as ui %}
+
+{% block title %}{{ 'nav.week'|trans }} · Meeting Bouncer{% endblock %}
+{% block layout %}aside-first{% endblock %}
+
+{% set open = invites|filter(i => i.status in ['pending', 'evaluated']) %}
+{% set filed = invites|filter(i => i.status in ['confirmed', 'overridden']) %}
+{% set reviewer = ui.persona_name(persona.value) %}
+{# One-shot flag from persona_switch: offer the re-review once, never run it on its own. #}
+{% set switched = app.flashes('persona_switched')|length > 0 %}
+
+{% block body %}
+<section aria-labelledby="in-tray"{% if reviewing %} data-controller="poll"{% endif %}>
+    <div class="tray-head">
+        <h2 id="in-tray">{{ 'dash.intray'|trans }} <span class="count">{{ open|length }}</span></h2>
+        {% if invites|length %}
+            {% if reviewing %}
+                <p class="todo reviewing" role="status"><span class="spinner" aria-hidden="true"></span> {{ 'dash.reviewing'|trans({count: reviewing|length}) }}</p>
+            {% elseif pendingCount %}
+                <form method="post" action="{{ path('evaluate_all') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('evaluate_all') }}">
+                    <button data-turbo-submits-with="{{ 'dash.reviewing'|trans({count: pendingCount}) }}"><span>{{ 'dash.review_waiting'|trans({count: pendingCount}) }}</span></button>
+                </form>
+            {% else %}
+                <p class="todo" role="status">{{ 'dash.all_reviewed'|trans }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if invites|length and pendingCount %}<p class="hint">{{ 'dash.hint'|trans({reviewer: reviewer}) }}</p>{% endif %}
+    {% if staleCount and not switched %}
+        <div class="row hint stale">
+            <span>{{ 'dash.stale'|trans({count: staleCount}) }}</span>
+            <form method="post" action="{{ path('evaluate_all') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('evaluate_all') }}">
+                <input type="hidden" name="scope" value="open">
+                <button class="ghost"{% if reviewing %} disabled{% endif %} data-turbo-submits-with="{{ 'dash.reading'|trans({reviewer: reviewer}) }}"><span>{{ 'dash.rereview'|trans({reviewer: reviewer}) }}</span></button>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if open|length %}
+        <ol class="tray">
+            {% for invite in open %}
+                <li class="sheet strip" style="--i: {{ loop.index0 }}"{% if invite.id in reviewing %} aria-busy="true"{% endif %} data-controller="tilt" data-action="pointermove->tilt#move pointerleave->tilt#reset">
+                    <div class="strip-main">
+                        <h3><a href="{{ path('verdict_show', {id: invite.id}) }}" class="stretch">{{ invite.title }}</a></h3>
+                        <p class="facts">{{ ui.facts(invite) }}</p>
+                        {% if invite.flags %}<ul class="chips" aria-label="{{ 'ui.doorcheck'|trans }}">{% for f in invite.flags %}<li>{{ f }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="strip-rec">
+                        {% if invite.id in reviewing %}
+                            <small class="todo reviewing" role="status"><span class="spinner" aria-hidden="true"></span>{{ 'dash.reading'|trans({reviewer: reviewer}) }}</small>
+                        {% elseif invite.verdictType %}
+                            {{ ui.tick(invite.verdictType) }}
+                        {% else %}
+                            <small class="todo">{{ 'dash.not_reviewed'|trans }}</small>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    {% elseif invites|length %}
+        <div class="tray-empty">
+            <i aria-hidden="true">mark_email_read</i>
+            <p><strong>{{ 'dash.zero.title'|trans }}</strong> {{ 'dash.zero.text'|trans }}</p>
+        </div>
+    {% else %}
+        <div class="tray-empty">
+            <i aria-hidden="true">inbox</i>
+            <p><strong>{{ 'dash.empty.title'|trans }}</strong> {{ 'dash.empty.text'|trans }}</p>
+            <div class="row">
+                <form method="post" action="{{ path('demo_import') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('demo_import') }}">
+                    <button><span>{{ 'dash.load_demo'|trans }}</span></button>
+                </form>
+                {% if googleConfigured and not googleConnected %}<a href="{{ path('google_connect') }}" class="button border" data-turbo="false"><span>{{ 'dash.g.connect'|trans }}</span></a>{% endif %}
+            </div>
+        </div>
+    {% endif %}
+</section>
+
+{% if filed|length %}
+<section aria-labelledby="filed" class="space-lg">
+    <h2 id="filed">{{ 'dash.filed'|trans }} <span class="count">{{ filed|length }}</span></h2>
+    <ol class="tray filed">
+        {% for invite in filed %}
+            <li class="sheet strip" style="--i: {{ loop.index0 }}">
+                <div class="strip-main">
+                    <h3><a href="{{ path('verdict_show', {id: invite.id}) }}" class="stretch">{{ invite.title }}</a></h3>
+                    <p class="facts">{{ ui.facts(invite) }}</p>
+                    {% if invite.flags %}<ul class="chips" aria-label="{{ 'ui.doorcheck'|trans }}">{% for f in invite.flags %}<li>{{ f }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="strip-rec">{{ ui.tick(invite.verdictType) }}<span class="strip-stamp">{{ ui.ink(invite.status) }}</span></div>
+            </li>
+        {% endfor %}
+    </ol>
+</section>
+{% endif %}
+
+<section class="sheet slip space-lg" aria-labelledby="sources">
+    <h2 id="sources"><i aria-hidden="true">calendar_month</i> {{ 'dash.calendar'|trans }}</h2>
+    {% if googleConnected %}
+        <p><small>{{ 'dash.g.connected'|trans }}</small></p>
+        <div class="row">
+            <form method="post" action="{{ path('google_import') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('google_import') }}">
+                <button class="border" data-turbo-submits-with="{{ 'dash.g.importing'|trans }}"><span>{{ 'dash.g.import'|trans }}</span></button>
+            </form>
+            <form method="post" action="{{ path('google_disconnect') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('google_disconnect') }}">
+                <button class="ghost"><span>{{ 'dash.g.disconnect'|trans }}</span></button>
+            </form>
+        </div>
+    {% elseif googleConfigured %}
+        <p><small>{{ 'dash.g.intro'|trans }}</small></p>
+        <a href="{{ path('google_connect') }}" class="button border" data-turbo="false"><span>{{ 'dash.g.connect'|trans }}</span></a>
+    {% else %}
+        <p><small>{{ 'dash.g.off'|trans|raw }}</small></p>
+    {% endif %}
+    {% if invites|length %}
+        <form method="post" action="{{ path('demo_import') }}" data-turbo-confirm="{{ 'dash.reset_confirm'|trans }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('demo_import') }}">
+            <button class="ghost"><span>{{ 'dash.reset'|trans }}</span></button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block aside %}
+<form method="post" action="{{ path('persona_switch') }}" class="panel">
+    <fieldset>
+        <legend><h2>{{ 'dash.who'|trans }}</h2></legend>
+        <div class="nameplates">
+            {% for p in personas %}
+                <label class="nameplate">
+                    <input type="radio" name="persona" value="{{ p.value }}" {{ p == persona ? 'checked' }} onchange="this.form.requestSubmit()">
+                    <b>{{ ui.persona_name(p.value) }}</b>
+                    <small>{{ ui.persona_vibe(p.value) }}</small>
+                </label>
+            {% endfor %}
+        </div>
+        <noscript><button class="border">{{ 'dash.switch'|trans }}</button></noscript>
+    </fieldset>
+</form>
+
+<form method="post" action="{{ path('hourly_rate') }}" class="sheet slip">
+    <h2><label for="hourly-rate">{{ 'dash.rate.title'|trans }}</label></h2>
+    <input type="hidden" name="_token" value="{{ csrf_token('hourly_rate') }}">
+    <p class="row">
+        <span class="unit" data-unit="€/h"><input id="hourly-rate" type="number" name="eur" required min="1" max="1000" step="0.5" value="{{ hourlyRate }}" aria-describedby="hourly-rate-hint"></span>
+        <button class="border"><span>{{ 'dash.rate.save'|trans }}</span></button>
+    </p>
+    <p id="hourly-rate-hint"><small>{{ 'dash.rate.hint'|trans }}</small></p>
+</form>
+
+{% if switched and staleCount %}
+<section class="note prompt" role="status" aria-labelledby="prompt-title">
+    <h2 id="prompt-title">{{ 'dash.prompt.title'|trans({reviewer: reviewer}) }}</h2>
+    <p>{{ 'dash.prompt.text'|trans({stale: staleCount, reviewer: reviewer, pending: pendingCount}) }}</p>
+    <p><small>{{ 'dash.prompt.note'|trans }}</small></p>
+    <div class="row">
+        <form method="post" action="{{ path('evaluate_all') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('evaluate_all') }}">
+                <input type="hidden" name="scope" value="open">
+                <button data-turbo-submits-with="{{ 'dash.reading'|trans({reviewer: reviewer}) }}"><span>{{ 'dash.prompt.review_all'|trans({count: staleCount + pendingCount, reviewer: reviewer}) }}</span></button>
+            </form>
+        <a href="{{ path('dashboard') }}" class="button ghost">{{ 'dash.prompt.keep'|trans }}</a>
+    </div>
+</section>
+{% endif %}
+
+<details class="note howto" {{ filed|length == 0 ? 'open' }}>
+    <summary><h2>{{ 'dash.how.title'|trans }}</h2></summary>
+    <ol>
+        <li>{{ 'dash.how.1'|trans|raw }}</li>
+        <li>{{ 'dash.how.2'|trans|raw }}</li>
+        <li>{{ 'dash.how.3'|trans|raw }}</li>
+    </ol>
+    {{ ui.legend() }}
+</details>
+
+{% endblock %}

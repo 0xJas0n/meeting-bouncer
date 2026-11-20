@@ -1,0 +1,21 @@
+# Door check thresholds. Tune live during the demo (dev env recompiles on change).
+parameters:
+    bouncer.hourly_rate_eur: 60 # default only; set it on the dashboard or via MCP set_hourly_rate
+    bouncer.min_agenda_chars: 40
+    bouncer.warn_attendees: 8
+    bouncer.optional_min_attendees: 6
+    bouncer.long_meeting_minutes: 60
+    bouncer.break_minutes: 10
+    bouncer.zombie_weeks: 12
+    bouncer.min_bad_ratings: 2
+
+services:
+    App\Screening\Domain\DoorCheck\RuleThresholds:
+        arguments:
+            $minAgendaChars: '%bouncer.min_agenda_chars%'
+            $warnAttendees: '%bouncer.warn_attendees%'
+            $optionalMinAttendees: '%bouncer.optional_min_attendees%'
+            $longMeetingMinutes: '%bouncer.long_meeting_minutes%'
+            $breakMinutes: '%bouncer.break_minutes%'
+            $zombieWeeks: '%bouncer.zombie_weeks%'
+            $minBadRatings: '%bouncer.min_bad_ratings%'

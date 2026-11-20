@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <title>{% block title %}Meeting Bouncer{% endblock %}</title>
+    {# Same-URL redirects (stamp, evaluate) morph instead of re-rendering: the ink lands without a page flash. #}
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+    {# Drop-on-desk: names are set in app.css during forward/back visits only. #}
+    <meta name="view-transition" content="same-origin">
+    {% block stylesheets %}{% endblock %}
+    {% block javascripts %}{{ importmap('app') }}{% endblock %}
+</head>
+<body>
+{# Rough rubber-stamp ink: wobbly edges + worn patches. Referenced via filter: url(#ink-rough). #}
+<svg class="defs" aria-hidden="true" focusable="false">
+    <filter id="ink-rough" x="-5%" y="-10%" width="110%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="4" result="grain"/>
+        <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.5" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+        {# Wear: only the faintest noise lows go thin, so text stays readable. #}
+        <feTurbulence type="fractalNoise" baseFrequency=".07" numOctaves="4" seed="9" result="blot"/>
+        <feColorMatrix in="blot" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  5 0 0 0 -.9" result="wear"/>
+        <feComposite in="rough" in2="wear" operator="in"/>
+    </filter>
+</svg>
+<a href="#main" class="sr-only skip">{{ 'nav.skip'|trans }}</a>
+{% set route = app.request.attributes.get('_route') %}
+{% set tabs = [
+    {route: 'dashboard', icon: 'inbox', label: 'nav.week'|trans, active: route in ['dashboard', 'verdict_show']},
+    {route: 'precheck', icon: 'edit_document', label: 'nav.precheck'|trans, active: route == 'precheck'},
+] %}
+<header class="letterhead">
+    <div class="letterhead-inner">
+        <a href="{{ path('dashboard') }}" class="logo"><i aria-hidden="true">door_front</i><h1>Meeting Bouncer</h1></a>
+        <form method="post" action="{{ path('locale_switch') }}" class="lang" aria-label="{{ 'nav.language'|trans }}">
+            {% for l in ['en', 'de'] %}
+                <button name="locale" value="{{ l }}" lang="{{ l }}" class="ghost"{% if app.request.locale == l %} aria-current="true"{% endif %}>{{ l|upper }}</button>
+            {% endfor %}
+        </form>
+    </div>
+</header>
+<div class="folder">
+<nav class="tabs" aria-label="{{ 'nav.main'|trans }}">
+    {% for t in tabs %}
+        <a href="{{ path(t.route) }}" class="tab"{% if t.active %} aria-current="page"{% endif %}><i aria-hidden="true">{{ t.icon }}</i><span class="tab-label">{{ t.label }}</span></a>
+    {% endfor %}
+</nav>
+<div class="desk-grid {% block layout %}{% endblock %}">
+    <main id="main">
+        {% for type in ['error', 'success'] %}{% for message in app.flashes(type) %}
+            <div class="note flash flash-{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}"><i aria-hidden="true">{{ type == 'error' ? 'error' : 'check_circle' }}</i> {{ message|trans }}</div>
+        {% endfor %}{% endfor %}
+        {% block body %}{% endblock %}
+    </main>
+    <aside aria-label="{{ 'nav.aside'|trans }}">
+        {{ render(controller('App\\Reporting\\UI\\Http\\StatsBannerController')) }}
+        {% block aside %}{% endblock %}
+    </aside>
+</div>
+</div>
+<footer class="confidential"><small><i aria-hidden="true">lock</i> {{ 'app.confidential'|trans }}
+    <span class="info" tabindex="0" role="button" aria-label="{{ 'app.confidential.more'|trans }}" aria-describedby="tip-confidential"><i aria-hidden="true">info</i><span class="tip" role="tooltip" id="tip-confidential">{{ 'app.confidential.detail'|trans }}</span></span>
+</small></footer>
+</body>
+</html>

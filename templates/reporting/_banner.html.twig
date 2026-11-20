@@ -1,0 +1,19 @@
+{# Adding-machine receipt. The functional test reads "Time X h Money Y €". #}
+<section class="receipt" aria-label="{{ 'rep.title'|trans }}">
+    <h2><i aria-hidden="true">receipt_long</i> {{ 'rep.title'|trans }}</h2>
+    <dl class="receipt-lines">
+        <div>
+            <dt>{{ 'rep.time'|trans }}</dt>
+            <dd data-controller="odometer" data-odometer-key-value="hours">{{ report.hoursSaved|hours }}</dd>
+        </div>
+        <div>
+            <dt>{{ 'rep.money'|trans }}</dt>
+            <dd data-controller="odometer" data-odometer-key-value="money">{{ report.centsSaved|eur }}</dd>
+        </div>
+    </dl>
+    {% if report.ratedWorthIt + report.ratedNotWorthIt > 0 %}
+        <p class="receipt-note"><small>{{ 'rep.worth'|trans({good: report.ratedWorthIt, total: report.ratedWorthIt + report.ratedNotWorthIt}) }}</small></p>
+    {% elseif report.centsSaved == 0 %}
+        <p class="receipt-note"><small>{{ 'rep.empty'|trans }}</small></p>
+    {% endif %}
+</section>

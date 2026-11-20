@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    # Domain rules are collected without putting framework attributes into the domain.
+    _instanceof:
+        App\Screening\Domain\DoorCheck\DoorRule:
+            tags: ['app.door_rule']
+        App\Screening\Application\Port\CalendarSource:
+            tags: ['app.calendar_source']
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/*/Domain/Model/'
+            - '../src/*/Domain/Event/'
+            - '../src/Screening/Domain/DoorCheck/{DoorCheck,DoorContext,Flag,Signal,RuleThresholds}.php'
+            - '../src/Reporting/Domain/{Savings,SavingsEntry}.php'
+            - '../src/*/Application/ReadModel/'
+            - '../src/*/Application/Import/Raw*.php'
+
+    App\Screening\Application\Import\CalendarSources:
+        arguments:
+            $sources: !tagged_iterator app.calendar_source
+
+    App\Screening\Domain\DoorCheck\DoorChecker:
+        arguments:
+            $rules: !tagged_iterator app.door_rule
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+when@test:
+    services:
+        # Tests must never see the dev token in var/google_token.json (would import the real calendar).
+        App\Screening\Infrastructure\Calendar\Google\GoogleTokenStore:
+            arguments: ['%kernel.project_dir%/var/google_token.test.json']

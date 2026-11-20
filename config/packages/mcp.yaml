@@ -1,0 +1,14 @@
+mcp:
+    servers:
+        default:
+            name: 'meeting-bouncer'
+            version: '1.0.0'
+            description: 'Judges calendar invites like a club door: Let in / Shorten / Go async / Bounce.'
+            instructions: 'Use check_week for an overview, check_meeting for one invite, precheck_draft before sending an invite. All data is pseudonymized; nothing is sent or changed in a real calendar.'
+            transports:
+                stdio: true
+                http: true
+            http:
+                path: /_mcp
+            # expose only our own MCP services (third-party bundles stay private)
+            registry: ['App\Screening\UI\Mcp\']

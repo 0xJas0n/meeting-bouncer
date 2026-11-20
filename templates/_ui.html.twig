@@ -1,0 +1,58 @@
+{# Shared paperwork. Two layers, never mixed:
+   - tick: the bouncer's recommendation (pen, one colour per verdict, icon + text)
+   - ink:  your decision (rubber stamp, Approved / Not approved only) #}
+
+{% macro tick(type) %}
+    {% set v = {
+        LET_IN:   'check_circle',
+        SHORTEN:  'timer',
+        GO_ASYNC: 'forum',
+        BOUNCE:   'block',
+    }[type] ?? null %}
+    {% if v %}<span class="tick tick-{{ type }}"><i aria-hidden="true">{{ v }}</i>{{ ('tick.' ~ type)|trans }}</span>{% endif %}
+{% endmacro %}
+
+{# All four options printed, the chosen one ticked: the form is its own legend. #}
+{% macro recommendation(chosen) %}
+    {% import _self as ui %}
+    <ul class="rec" aria-label="{{ 'ui.recommendation'|trans }}">
+        {% for type in ['LET_IN', 'SHORTEN', 'GO_ASYNC', 'BOUNCE'] %}
+            <li class="tick-{{ type }}{{ type == chosen ? ' on' }}">
+                <span class="box" aria-hidden="true">{% if type == chosen %}<i>check</i>{% endif %}</span>
+                {{ ui.tick(type) }}{% if type == chosen %}<span class="sr-only"> ({{ 'ui.recommended'|trans }})</span>{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{# What each recommendation means, in plain words. #}
+{% macro legend() %}
+    {% import _self as ui %}
+    <dl class="legend">
+        <dt>{{ ui.tick('LET_IN') }}</dt><dd>{{ 'legend.LET_IN'|trans }}</dd>
+        <dt>{{ ui.tick('SHORTEN') }}</dt><dd>{{ 'legend.SHORTEN'|trans }}</dd>
+        <dt>{{ ui.tick('GO_ASYNC') }}</dt><dd>{{ 'legend.GO_ASYNC'|trans }}</dd>
+        <dt>{{ ui.tick('BOUNCE') }}</dt><dd>{{ 'legend.BOUNCE'|trans }}</dd>
+    </dl>
+{% endmacro %}
+
+{# The one rubber stamp. kind: confirmed | overridden (anything else renders nothing). #}
+{% macro ink(kind, size = 'sm', note = null) %}
+    {% set v = {
+        confirmed:  true,
+        overridden: true,
+    }[kind] ?? null %}
+    {% if v %}<span class="ink ink-{{ kind }} {{ size }}"><b>{{ ('ink.' ~ kind)|trans }}</b>{% if size == 'lg' %}<small>{{ note ?? ('ink.' ~ kind ~ '.note')|trans }}</small>{% endif %}</span>{% endif %}
+{% endmacro %}
+
+{% macro persona_name(value) %}{{ ('persona.' ~ value ~ '.name')|trans }}{% endmacro %}
+
+{% macro persona_vibe(value) %}{{ ('persona.' ~ value ~ '.vibe')|trans }}{% endmacro %}
+
+{# Meeting facts in one typed line. Works for InviteSummary and VerdictView. #}
+{% macro facts(i) %}
+    <span><i aria-hidden="true">event</i>{{ i.start|date('d.m.Y') }}, {{ i.start|date('H:i') }}</span>
+    <span><i aria-hidden="true">schedule</i>{{ i.durationMinutes }} min</span>
+    <span><i aria-hidden="true">group</i>{{ 'ui.guests'|trans({count: i.attendeeCount}) }}</span>
+    <span><i aria-hidden="true">euro</i>{{ i.costCents|eur }}</span>
+{% endmacro %}

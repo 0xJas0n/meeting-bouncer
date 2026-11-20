@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% import '_ui.html.twig' as ui %}
+
+{% block title %}{{ v.title }} · Meeting Bouncer{% endblock %}
+
+{% set token = csrf_token('invite_' ~ v.id) %}
+
+{% block body %}
+<a href="{{ path('dashboard') }}" class="button ghost back"><i aria-hidden="true">arrow_back</i> <span>{{ 'verdict.back'|trans }}</span></a>
+
+{# The desk: 3D stage for the sheet. stamp_controller drives data-pressing; data-status keeps the ink after the morph. #}
+<div class="desk" data-controller="stamp tilt" data-tilt-max-value="1.5"
+     data-action="pointermove->tilt#move pointerleave->tilt#reset" data-status="{{ v.status }}">
+<div class="desk-card">
+<article class="sheet form stack">
+    <header class="form-head">
+        <small>{{ 'verdict.kicker'|trans({id: v.id}) }}</small>
+        <h2>{{ v.title }}</h2>
+        <p class="facts">{{ ui.facts(v) }}</p>
+    </header>
+
+    <section class="form-part">
+        <h3>{{ 'ui.doorcheck'|trans }}</h3>
+        <ul class="checklist">
+            {% for f in v.flags %}
+                <li><span class="box" aria-hidden="true"><i>close</i></span>{{ f }}</li>
+            {% else %}
+                <li class="clean"><span class="box" aria-hidden="true"></span>{{ 'verdict.clean'|trans }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="form-part">
+        <h3>{{ 'ui.recommendation'|trans }}</h3>
+        {% if v.verdictType %}
+            {{ ui.recommendation(v.verdictType) }}
+            {% if v.suggestedDurationMin %}<p class="hint">{{ 'verdict.suggested'|trans({suggested: v.suggestedDurationMin, current: v.durationMinutes})|raw }}</p>{% endif %}
+            <p class="why"><span>{{ 'verdict.why'|trans }}</span> {{ v.seriousReason }}</p>
+        {% else %}
+            <p>{{ 'verdict.unchecked'|trans }}</p>
+            <form method="post" action="{{ path('verdict_evaluate', {id: v.id}) }}">
+                <input type="hidden" name="_token" value="{{ token }}">
+                <button data-turbo-submits-with="{{ 'verdict.reading'|trans }}"><span>{{ 'verdict.ask'|trans }}</span></button>
+            </form>
+        {% endif %}
+    </section>
+
+    {% if v.verdictType %}
+    <section class="form-part decision">
+        {# Both states are always rendered in one grid cell (the hidden one is inert), so the section keeps its size when you stamp. #}
+        {% set decided = not v.canDecide %}
+        <div class="decision-actions">
+            <h3 tabindex="-1">{{ 'verdict.decision'|trans }}</h3>
+            <div class="swap">
+                <div{% if decided %} inert aria-hidden="true"{% endif %}>
+                    <form method="post" action="{{ path('verdict_evaluate', {id: v.id}) }}">
+                        <input type="hidden" name="_token" value="{{ token }}">
+                        <button class="ghost" data-turbo-submits-with="{{ 'verdict.reading'|trans }}"><span>{{ 'verdict.again'|trans }}</span></button>
+                    </form>
+                </div>
+                <div{% if not decided %} inert aria-hidden="true"{% endif %}>
+                    <p>{{ (v.status == 'overridden' ? 'verdict.filed.overridden' : 'verdict.filed.confirmed')|trans|raw }}</p>
+                    <div class="swap">
+                        <form method="post" action="{{ path('verdict_rate', {id: v.id}) }}" class="rate"{% if not v.canRate %} inert aria-hidden="true"{% endif %}>
+                            <input type="hidden" name="_token" value="{{ token }}">
+                            <span>{{ 'verdict.rate'|trans }}</span>
+                            <div class="row">
+                                <button name="worth" value="yes" class="border"><span>{{ 'verdict.yes'|trans }}</span></button>
+                                <button name="worth" value="no" class="border"><span>{{ 'verdict.no'|trans }}</span></button>
+                            </div>
+                        </form>
+                        <p class="hint"{% if v.worthIt is null %} inert aria-hidden="true"{% endif %}>{{ (v.worthIt ? 'verdict.rated.yes' : 'verdict.rated.no')|trans }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="decision-stamp">
+            <div class="stamp-box">
+                <span class="stamp-box-label">{{ (v.canDecide ? 'verdict.stamp_here' : 'verdict.decision_label')|trans }}</span>
+                <div class="press" aria-hidden="true">
+                    {{ ui.ink('confirmed', 'lg') }}
+                    {{ ui.ink('overridden', 'lg') }}
+                    <span class="tool-shadow"></span>
+                    <span class="tool"><span class="knob"></span><span class="neck"></span><span class="block"></span><span class="pad"></span></span>
+                </div>
+            </div>
+            <div class="pads"{% if decided %} inert aria-hidden="true"{% endif %}>
+                <form method="post" action="{{ path('verdict_confirm', {id: v.id}) }}" data-action="stamp#press" data-stamp-kind-param="confirmed">
+                    <input type="hidden" name="_token" value="{{ token }}">
+                    <button class="approve" aria-describedby="tip-approve"><span>{{ 'verdict.approve'|trans }}</span></button>
+                    <span class="tip" role="tooltip" id="tip-approve">{{ 'verdict.approve.note'|trans }}</span>
+                </form>
+                <form method="post" action="{{ path('verdict_override', {id: v.id}) }}" data-action="stamp#press" data-stamp-kind-param="overridden">
+                    <input type="hidden" name="_token" value="{{ token }}">
+                    <button class="reject" aria-describedby="tip-reject"><span>{{ 'verdict.reject'|trans }}</span></button>
+                    <span class="tip" role="tooltip" id="tip-reject">{{ 'verdict.reject.note'|trans }}</span>
+                </form>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</article>
+</div>
+</div>
+{% endblock %}
+
+{% block aside %}
+{% if v.jokeLine %}
+    <figure class="note">
+        <blockquote class="joke">{{ v.jokeLine }}</blockquote>
+        <figcaption>{{ 'verdict.on_door'|trans({persona: ui.persona_name(v.persona)}) }}</figcaption>
+    </figure>
+{% endif %}
+
+{% for memo in [
+    {text: v.replyDraft, title: 'memo.reply'|trans, icon: 'reply', mail: true},
+    {text: v.asyncTemplate, title: 'memo.async'|trans, icon: 'forum'},
+] %}
+    {% if memo.text %}
+        <section class="sheet memo" data-controller="copy" data-copy-done-value="{{ 'memo.copied'|trans }}" data-copy-template-value="{{ memo.text }}" data-copy-subject-value="Re: {{ v.title }}" data-copy-to-value="{{ v.organizerEmail ?? '' }}">
+            <h2><i aria-hidden="true">{{ memo.icon }}</i> {{ memo.title }}</h2>
+            {% if memo.mail|default(false) %}
+                <label class="sender"><span>{{ 'memo.sender'|trans }}</span> <input type="text" autocomplete="name" data-copy-target="name" data-action="input->copy#rename"></label>
+            {% endif %}
+            <textarea rows="6" readonly aria-label="{{ memo.title }}" data-copy-target="source">{{ memo.text|replace({'{sender}': ''})|trim }}</textarea>
+            <div class="row">
+                <button class="border" type="button" data-action="copy#copy"><span data-copy-target="label">{{ 'memo.copy'|trans }}</span></button>
+                {% if memo.mail|default(false) %}
+                    <a class="button border" data-copy-target="mail" href="mailto:{{ (v.organizerEmail ?? '')|url_encode }}?subject={{ ('Re: ' ~ v.title)|url_encode }}&body={{ memo.text|replace({'{sender}': ''})|trim|url_encode }}"><span>{{ 'memo.mail'|trans }}</span></a>
+                {% endif %}
+                <small>{{ 'memo.note'|trans }}</small>
+            </div>
+        </section>
+    {% endif %}
+{% endfor %}
+{% endblock %}

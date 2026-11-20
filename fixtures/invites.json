@@ -1,0 +1,311 @@
+{
+  "invites": [
+    {
+      "id": "inv-quick-sync",
+      "title": "Quick sync",
+      "description": "sync",
+      "dayOffset": 1,
+      "time": "14:00",
+      "durationMin": 60,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true,
+          "optional": true
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        },
+        {
+          "name": "Tobias Mustermann",
+          "email": "tobias.mustermann@example.com"
+        },
+        {
+          "name": "Sophie Mustermann",
+          "email": "sophie.mustermann@example.com"
+        },
+        {
+          "name": "Jonas Mustermann",
+          "email": "jonas.mustermann@example.com"
+        },
+        {
+          "name": "Clara Mustermann",
+          "email": "clara.mustermann@example.com"
+        },
+        {
+          "name": "Felix Mustermann",
+          "email": "felix.mustermann@example.com"
+        },
+        {
+          "name": "Nora Mustermann",
+          "email": "nora.mustermann@example.com"
+        },
+        {
+          "name": "Paul Mustermann",
+          "email": "paul.mustermann@example.com"
+        }
+      ],
+      "language": "en"
+    },
+    {
+      "id": "inv-pricing",
+      "title": "Decide Q1 pricing",
+      "description": "Goal: decide the Q1 price for the Pro tier (49 EUR vs 59 EUR). Pre-read by Erika Mustermann (erika.mustermann@example.com): pricing-draft v3. Outcome: one decision, owner named, announced the same day.",
+      "dayOffset": 2,
+      "time": "10:00",
+      "durationMin": 30,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true,
+          "optional": false
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        }
+      ],
+      "language": "en"
+    },
+    {
+      "id": "inv-roadmap",
+      "title": "Roadmap review",
+      "description": "Walk through the Q1 roadmap items, collect feedback from each team and agree on priorities. Questions to Max Mustermann or call +43 660 1234567 before the meeting. Slides: https://wiki.example.com/roadmap",
+      "dayOffset": 3,
+      "time": "13:00",
+      "durationMin": 90,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true,
+          "optional": false
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        },
+        {
+          "name": "Tobias Mustermann",
+          "email": "tobias.mustermann@example.com"
+        },
+        {
+          "name": "Sophie Mustermann",
+          "email": "sophie.mustermann@example.com"
+        },
+        {
+          "name": "Jonas Mustermann",
+          "email": "jonas.mustermann@example.com"
+        }
+      ],
+      "language": "en"
+    },
+    {
+      "id": "inv-team-status",
+      "title": "Team status",
+      "description": "Weekly status round",
+      "dayOffset": 0,
+      "time": "09:30",
+      "durationMin": 30,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true,
+          "optional": false
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        },
+        {
+          "name": "Tobias Mustermann",
+          "email": "tobias.mustermann@example.com"
+        },
+        {
+          "name": "Sophie Mustermann",
+          "email": "sophie.mustermann@example.com"
+        },
+        {
+          "name": "Jonas Mustermann",
+          "email": "jonas.mustermann@example.com"
+        },
+        {
+          "name": "Clara Mustermann",
+          "email": "clara.mustermann@example.com"
+        },
+        {
+          "name": "Felix Mustermann",
+          "email": "felix.mustermann@example.com"
+        }
+      ],
+      "recurringWeeks": 40,
+      "language": "en"
+    },
+    {
+      "id": "inv-onboarding",
+      "title": "Customer onboarding review",
+      "description": "Review the three open onboarding tickets and decide which ones we fix this sprint. Input from Lena Mustermann (lena.mustermann@example.com) and the support board.",
+      "dayOffset": 2,
+      "time": "15:00",
+      "durationMin": 60,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true,
+          "optional": false
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        },
+        {
+          "name": "Tobias Mustermann",
+          "email": "tobias.mustermann@example.com"
+        }
+      ],
+      "language": "en"
+    },
+    {
+      "id": "inv-wochenplanung",
+      "title": "Wochenplanung Vertrieb",
+      "description": "Besprechung der Vertriebsthemen der kommenden Woche, bitte Zahlen vorab an Tobias Mustermann (tobias.mustermann@example.com) schicken.",
+      "dayOffset": 4,
+      "time": "11:00",
+      "durationMin": 60,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true,
+          "optional": false
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        },
+        {
+          "name": "Tobias Mustermann",
+          "email": "tobias.mustermann@example.com"
+        },
+        {
+          "name": "Sophie Mustermann",
+          "email": "sophie.mustermann@example.com"
+        }
+      ],
+      "language": "de"
+    },
+    {
+      "id": "inv-design-sync",
+      "title": "Design sync",
+      "description": "Review the new onboarding mockups and agree on the next iteration with Sophie Mustermann.",
+      "dayOffset": 4,
+      "time": "09:30",
+      "durationMin": 30,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        }
+      ],
+      "language": "en"
+    },
+    {
+      "id": "inv-planning",
+      "title": "Sprint planning",
+      "description": "Plan the next sprint: pick tickets from the refined backlog and confirm capacity for everybody.",
+      "dayOffset": 4,
+      "time": "10:00",
+      "durationMin": 60,
+      "attendees": [
+        {
+          "name": "Demo User",
+          "email": "demo.user@example.com",
+          "self": true
+        },
+        {
+          "name": "Erika Mustermann",
+          "email": "erika.mustermann@example.com"
+        },
+        {
+          "name": "Max Mustermann",
+          "email": "max.mustermann@example.com"
+        },
+        {
+          "name": "Lena Mustermann",
+          "email": "lena.mustermann@example.com"
+        }
+      ],
+      "language": "en"
+    }
+  ],
+  "focusBlocks": [
+    {
+      "id": "focus-deep-work",
+      "dayOffset": 2,
+      "time": "14:30",
+      "durationMin": 150
+    }
+  ]
+}
